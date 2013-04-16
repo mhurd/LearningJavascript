@@ -3,16 +3,43 @@
 <head>
     <title>Example Test Suite</title>
     <script>
-        function assert(value, desc) {
-            var li = document.createElement("li");
-            li.className = value ? "pass" : "fail";
-            li.appendChild(document.createTextNode(desc));
-            document.getElementById("results").appendChild(li)
-        };
+        (function() {
+            // 'results' is only available in the closure created by this
+            // anonymous function invocation.
+            var results;
+            // 'this' is the Window as the outer anonymous function
+            // is invoked in the global context.
+            this.assert = function assert(value, desc) {
+                var li = document.createElement("li");
+                li.className = value ? "pass" : "fail";
+                li.appendChild(document.createTextNode(desc));
+                results.appendChild(li)
+                if (!value) {
+                    li.parentNode.parentNode.className = "fail";
+                }
+                return li;
+            };
+            this.test = function test(name, fn) {
+                results = document.getElementById("results");
+                results = assert(true, name).appendChild(document.createElement("ul"));
+                fn();
+            };
+        })();
         window.onload = function() {
-            assert(true, "The test is passing")
-            assert(false, "The test is failing!")
-
+            this.test("A test.", function() {
+                this.assert(true, "First assertion completed");
+                this.assert(true, "Second assertion completed");
+                this.assert(true, "Third assertion completed");
+            });
+            this.test("Another test.", function() {
+                this.assert(true, "First test completed");
+                this.assert(false, "Second test failed");
+                this.assert(true, "Third assertion completed");
+            });
+            this.test("A third test.", function() {
+                this.assert(null, "fail");
+                this.assert(5, "pass")
+            });
         };
     </script>
     <style>
