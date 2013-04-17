@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Function Recursion Basics</title>
+    <script>
+        (function() {
+            // 'results' is only available in the closure created by this
+            // anonymous function invocation.
+            var results;
+            // 'this' is the Window as the outer anonymous function
+            // is invoked in the global context.
+            this.assert = function assert(value, desc) {
+                var li = document.createElement("li");
+                li.className = value ? "pass" : "fail";
+                li.appendChild(document.createTextNode(desc));
+                results.appendChild(li)
+                if (!value) {
+                    li.parentNode.parentNode.className = "fail";
+                }
+                return li;
+            };
+            this.test = function test(name, fn) {
+                results = document.getElementById("results");
+                results = assert(true, name).appendChild(document.createElement("ul"));
+                fn();
+            };
+        })();
+        window.onload = function() {
+            // Secrets of the Javascript Ninja; 4.2.1
+            this.test("function recusion (palindrome)", function() {
+                function isPalindrome(text) {
+                    if (text === undefined || text === null || text.length < 1) return false;
+                    if (text.length === 1) return true;
+                    if (text.charAt(0) != text.charAt(text.length - 1)) return false;
+                    return isPalindrome(text.substr(1,text.length - 2));
+                }
+                assert(isPalindrome("A") === true, "'A' is a palindrome");
+                assert(isPalindrome("foobaboof") === true, "'foobaboof' is a palindrome");
+                assert(isPalindrome("foobar") === false, "'foobar' is NOT a palindrome");
+                assert(isPalindrome(undefined) === false, "undefined is NOT a palindrome");
+                assert(isPalindrome(null) === false, "null is NOT a palindrome");
+            });
+            this.test("function recursion, named functions (chirping)", function() {
+                function chirp(n) {
+                    return n > 1 ? chirp(n-1) + "-chirp" : "chirp";
+                }
+                assert(chirp(3) == "chirp-chirp-chirp", "calling the named function recursively comes naturally");
+            });
+            // Secrets of the Javascript Ninja; 4.2.1
+            this.test("function recursion, anonymous functions (chirping)", function() {
+                var ninja = {
+                    chirp: function chirp(n) {
+                        return n > 1 ? chirp(n-1) + "-chirp" : "chirp";
+                        // note that the function name 'chirp' is only visible inside the function scope, this
+                        // shadows the method 'chirp' from the object that is the function's context.
+                        // This will make the recursive call still work if the 'method' is renamed for example.
+                    }
+                }
+                assert(ninja.chirp(3) == "chirp-chirp-chirp", "calling the named anonymous function works");
+            });
+            // Secrets of the Javascript Ninja; 4.3.2
+            this.test("Memoizing expensive operations", function() {
+                function isPrime(value) {
+                    if (!isPrime.answers) isPrime.answers = {};
+                    if (isPrime.answers[value] != null) {
+                        return isPrime.answers[value];
+                    }
+                    var prime = value != 1; // 1 can never be prime
+                    for (var i=2; i < value; i++) {
+                        if (value % i == 0) {
+                            prime = false;
+                            break;
+                        }
+                    }
+                    return isPrime.answers[value] = prime;
+                }
+                assert(isPrime(5), "5 is prime!");
+                assert(isPrime.answers[5], "The answer was cached!");
+            });
+        };
+    </script>
+    <style>
+        #results li.pass { color: green;}
+        #results li.fail { color: red;}
+    </style>
+</head>
+<body>
+    <ul id="results"></ul>
+</body>
+</html>
