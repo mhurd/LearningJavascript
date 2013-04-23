@@ -2,6 +2,9 @@
 <html>
 <head>
     <title>Function Recursion Basics</title>
+    <div id="fooBox">FOO</div>
+    <div id="barBox">BAR</div>
+    <script type="text/javascript" src="jquery-2.0.0.js"></script>
     <script>
         (function() {
             // 'results' is only available in the closure created by this
@@ -27,7 +30,7 @@
         })();
         window.onload = function() {
             // Secrets of the Javascript Ninja; 5.2.1
-            this.test("private variables", function() {
+            this.test("private variables in a closure", function() {
                 function Ninja() {
                     var feints = 0;
                     this.getFeints = function() {
@@ -44,6 +47,27 @@
 
                 assert(ninja.getFeints() == 1, "We're able to access the internal feint count (via an accessor)");
                 assert(ninja.feints === undefined, "And the private data is inaccessible to us.");
+            });
+            // Secrets of the Javascript Ninja; 5.2.2
+            this.test("Callbacks and timers", function() {
+                function animateIt(elementId, grow) {
+                    var elem = document.getElementById(elementId);
+                    var tick = grow ? 50 : 100;
+                    var timer = setInterval(function() {
+                       if (grow ? tick < 100 : tick > 50) {
+                           elem.style.fontSize = tick + "px";
+                           grow ? tick++ : tick--;
+                       } else {
+                           clearInterval(timer);
+                           var name = grow ? "Growing " : "Shrinking ";
+                           assert(grow ? tick == 100 : tick == 50, "Tick accessed via a closure.");
+                           assert(elem, name + " element also accessed via a closure.");
+                           assert(timer, "Timer reference also obtainable via a closure.")
+                       }
+                    }, 10);
+                }
+                animateIt("fooBox", true);
+                animateIt("barBox", false);
             });
         };
     </script>
